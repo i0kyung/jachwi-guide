@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FFFBF5" />
+<title>수리 요청 퀴즈 · 자취력 키우기</title>
+<link rel="icon" type="image/png" href="assets/brand/app-icon-64.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/quiz.css" />
+</head>
+<body>
+  <div class="app no-tabbar" id="app">
+    <header class="appbar">
+      <button type="button" class="icon-btn" id="back-btn" aria-label="홈으로"></button>
+      <div class="appbar-title"><small>자취력 키우기</small><strong id="field-name"></strong></div>
+      <span class="progress" id="progress">1 / 5</span>
+    </header>
+    <div class="segments" id="segments"></div>
+    <main class="app-main">
+      <div class="char-wrap">
+        <img id="character-img" class="character-img fade-up" src="assets/characters/repair_pose 01.png" alt="루온" />
+        <div class="bubble" id="bubble">참 잘했어요!</div>
+      </div>
+      <section class="quiz-card" id="quiz-card">
+        <span class="scene-tag" id="scene-tag">상황</span>
+        <h1 class="scene-title" id="scene-title"></h1>
+        <p class="scene-text" id="scene-text"></p>
+        <div class="choices" id="choices"></div>
+        <div class="explain" id="explain">
+          <span class="explain-head" id="explain-head">정답 해설</span>
+          <span class="explain-text" id="explain-text"></span>
+          <span class="source" id="source"></span>
+        </div>
+        <button type="button" class="btn btn-lime next-btn" id="next-btn">다음 문제 <span class="chev">›</span></button>
+      </section>
+    </main>
+    <div class="combo" id="combo"><img src="assets/stickers/sticker-streak.png" alt="" /><strong>2연속 정답!</strong></div>
+    <div class="sticker-pop" id="sticker-pop"><div class="sticker-card"></div></div>
+  </div>
+
+
+<script src="js/app.js"></script>
+<script>
+/* =========================================================
+   이 페이지의 분야 설정 — 다른 분야는 이 부분만 바꾸면 됨
+   ========================================================= */
+const CATEGORY = { id:'repair', emoji:'🔧', poseImg:'assets/characters/repair_pose 01.png', correctImg:'assets/characters/repair_pose 02.png', wrongImg:'assets/characters/repair_pose 03.png' };
+
+/* 문제 데이터 (기존 그대로) */
+const QUESTIONS = [
+  {
+    sceneTitle:"화장실 천장에서 물이 떨어지는 밤",
+    sceneText:"윗집에서 물이 새는지 천장에 얼룩이 번지고 물방울이 떨어져요.",
+    choices:["마를 때까지 그냥 둔다","사진을 찍어 기록하고 임대인·관리실에 알린다","내가 직접 천장을 뜯어 고친다"],
+    answerIndex:1,
+    explanation:"누수는 상황을 사진으로 기록하고 임대인·관리실에 바로 알리는 게 좋다고 해! 원인 파악과 책임 구분에 도움이 돼요.",
+    source:"2026.05 주택임대차 분쟁 안내 기준"
+  },
+  {
+    sceneTitle:"한겨울 보일러가 멈춘 새벽",
+    sceneText:"갑자기 난방과 온수가 모두 안 나와요. 너무 추워요.",
+    choices:["임대인에게 알리지 않고 내가 수리업체를 부른다","임대인에게 먼저 알리고 수리 절차를 협의한다","날이 풀릴 때까지 버틴다"],
+    answerIndex:1,
+    explanation:"보일러 같은 기본 설비 고장은 먼저 임대인에게 알리고 수리 절차를 협의하는 게 좋다고 해! 임의 수리는 비용 분쟁이 생길 수 있어요.",
+    source:"2026.05 주택임대차 안내 기준"
+  },
+  {
+    sceneTitle:"거실 전등이 나가 버린 저녁",
+    sceneText:"방 전등이 깜빡이다 완전히 꺼졌어요. 전구만 갈면 될지 배선 문제인지 모르겠어요.",
+    choices:["분전반을 직접 분해해 본다","전구 교체로 해결 안 되면 임대인·전문가에게 알린다","어두운 채로 지낸다"],
+    answerIndex:1,
+    explanation:"단순 전구 교체로 해결되지 않으면 임대인이나 전기 전문가에게 알리는 게 좋다고 해! 배선·분전반은 직접 다루면 위험해요.",
+    source:"2026.05 전기안전 안내 기준"
+  },
+  {
+    sceneTitle:"임대인에게 수리를 부탁하려는 순간",
+    sceneText:"전화로 말하면 편하긴 한데, 나중에 말이 달라질까 걱정돼요.",
+    choices:["전화로만 구두로 요청한다","문자·메시지로 요청 내용을 남겨 기록한다","말하지 않고 그냥 참는다"],
+    answerIndex:1,
+    explanation:"수리 요청은 문자·메시지처럼 기록이 남는 방법으로 남겨 두는 게 좋다고 해! 요청 시점과 내용이 증거로 남아요.",
+    source:"2026.05 주택임대차 분쟁 예방 기준"
+  },
+  {
+    sceneTitle:"수리비를 누가 낼지 애매한 상황",
+    sceneText:"노후로 인한 고장인지, 내 부주의 때문인지 헷갈려요. 수리는 했는데 영수증을 버릴까 고민돼요.",
+    choices:["영수증은 필요 없으니 버린다","수리 내역과 영수증을 보관해 둔다","비용은 따지지 않고 넘어간다"],
+    answerIndex:1,
+    explanation:"수리 내역과 영수증은 보관해 두는 게 좋다고 해! 노후로 인한 수선은 보통 임대인 부담이라, 비용 정산 시 근거가 돼요.",
+    source:"2026.05 주택임대차 수선의무 안내 기준"
+  }
+];
+</script>
+<script src="js/quiz.js"></script>
+</body>
+</html>

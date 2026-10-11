@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FFFBF5" />
+<title>공과금 퀴즈 · 자취력 키우기</title>
+<link rel="icon" type="image/png" href="assets/brand/app-icon-64.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/quiz.css" />
+</head>
+<body>
+  <div class="app no-tabbar" id="app">
+    <header class="appbar">
+      <button type="button" class="icon-btn" id="back-btn" aria-label="홈으로"></button>
+      <div class="appbar-title"><small>자취력 키우기</small><strong id="field-name"></strong></div>
+      <span class="progress" id="progress">1 / 5</span>
+    </header>
+    <div class="segments" id="segments"></div>
+    <main class="app-main">
+      <div class="char-wrap">
+        <img id="character-img" class="character-img fade-up" src="assets/characters/bill_pose 01.png" alt="루온" />
+        <div class="bubble" id="bubble">참 잘했어요!</div>
+      </div>
+      <section class="quiz-card" id="quiz-card">
+        <span class="scene-tag" id="scene-tag">상황</span>
+        <h1 class="scene-title" id="scene-title"></h1>
+        <p class="scene-text" id="scene-text"></p>
+        <div class="choices" id="choices"></div>
+        <div class="explain" id="explain">
+          <span class="explain-head" id="explain-head">정답 해설</span>
+          <span class="explain-text" id="explain-text"></span>
+          <span class="source" id="source"></span>
+        </div>
+        <button type="button" class="btn btn-lime next-btn" id="next-btn">다음 문제 <span class="chev">›</span></button>
+      </section>
+    </main>
+    <div class="combo" id="combo"><img src="assets/stickers/sticker-streak.png" alt="" /><strong>2연속 정답!</strong></div>
+    <div class="sticker-pop" id="sticker-pop"><div class="sticker-card"></div></div>
+  </div>
+
+
+<script src="js/app.js"></script>
+<script>
+/* =========================================================
+   이 페이지의 분야 설정 — 다른 분야는 이 부분만 바꾸면 됨
+   ========================================================= */
+const CATEGORY = { id:'bills', emoji:'💡', poseImg:'assets/characters/bill_pose 01.png', correctImg:'assets/characters/bill_pose 02.png', wrongImg:'assets/characters/bill_pose 03.png' };
+
+/* 문제 데이터 (기존 그대로) */
+const QUESTIONS = [
+  {
+    sceneTitle:"첫 전기요금 고지서를 받은 날",
+    sceneText:"생각보다 요금이 많이 나온 것 같아요. 누진 구간이 어떻게 되는지도 잘 모르겠어요.",
+    choices:["고지서는 그냥 금액만 보고 납부한다","사용량과 청구 내역을 확인하고 비교한다","요금은 원래 그런 거라 넘긴다"],
+    answerIndex:1,
+    explanation:"전기요금은 사용량과 청구 내역을 확인해 보는 게 좋다고 해! 한전 사이버지점·앱에서 사용량을 조회할 수 있어요.",
+    source:"2026.05 한국전력공사 기준"
+  },
+  {
+    sceneTitle:"새 집으로 이사 온 첫날",
+    sceneText:"도시가스가 들어오는 집인데, 전입 신고만 하면 가스도 알아서 되는 줄 알았어요.",
+    choices:["전입 신고만 하면 가스도 자동 처리된다","도시가스사에 전입(사용 신청)을 따로 연락한다","사용하다 보면 알아서 청구된다"],
+    answerIndex:1,
+    explanation:"도시가스는 입주 시 해당 지역 도시가스사에 전입(사용 개시)을 따로 신청하는 게 좋다고 해! 전출 시에도 정산이 필요해요.",
+    source:"2026.05 도시가스 이용 안내 기준"
+  },
+  {
+    sceneTitle:"수도요금이 평소보다 많이 나온 달",
+    sceneText:"이번 달 수도요금이 유독 많이 나왔어요. 어디서 새는 건 아닌지 걱정돼요.",
+    choices:["요금만 내고 그냥 넘어간다","사용량을 확인하고 누수 여부를 점검한다","수도는 원래 비싸다고 생각한다"],
+    answerIndex:1,
+    explanation:"수도요금이 갑자기 늘면 사용량을 확인하고 누수가 있는지 점검하는 게 좋다고 해! 계량기가 멈췄을 때도 돌아가면 누수 신호예요.",
+    source:"2026.05 상수도사업본부 기준"
+  },
+  {
+    sceneTitle:"관리비 고지서를 처음 펼친 날",
+    sceneText:"관리비 안에 여러 항목이 적혀 있는데 무슨 항목인지 잘 모르겠어요.",
+    choices:["총액만 보고 바로 납부한다","항목별 내역을 확인해 본다","관리비는 따질 필요 없다"],
+    answerIndex:1,
+    explanation:"관리비는 항목별 내역을 확인해 보는 게 좋다고 해! 공용 전기·수도, 청소비 등 구성을 알면 과다 청구도 점검할 수 있어요.",
+    source:"2026.05 공동주택관리 정보 기준"
+  },
+  {
+    sceneTitle:"매달 납부일을 자꾸 놓치는 나",
+    sceneText:"바빠서 공과금 납부일을 자꾸 깜빡해요. 연체될까 봐 불안해요.",
+    choices:["그때그때 기억나면 납부한다","자동이체를 신청해 둔다","연체되면 그때 낸다"],
+    answerIndex:1,
+    explanation:"정기적으로 나오는 공과금은 자동이체를 신청해 두는 게 좋다고 해! 납부 누락과 연체를 예방할 수 있어요.",
+    source:"2026.05 공과금 납부 안내 기준"
+  },
+  {
+    sceneTitle:"전 세입자 이름으로 온 요금 고지서",
+    sceneText:"고지서에 내 이름이 아니라 이전에 살던 사람 이름이 적혀 있어요.",
+    choices:["남의 이름이니 그냥 둔다","요금 명의를 내 이름으로 변경 신청한다","이름은 중요하지 않으니 무시한다"],
+    answerIndex:1,
+    explanation:"공과금은 실제 사용자 명의로 변경해 두는 게 좋다고 해! 명의가 다르면 정산·환급·문의가 번거로워질 수 있어요.",
+    source:"2026.05 공과금 명의변경 안내 기준"
+  }
+];
+</script>
+<script src="js/quiz.js"></script>
+</body>
+</html>

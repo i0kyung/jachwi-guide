@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FFFBF5" />
+<title>세탁 퀴즈 · 자취력 키우기</title>
+<link rel="icon" type="image/png" href="assets/brand/app-icon-64.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/quiz.css" />
+</head>
+<body>
+  <div class="app no-tabbar" id="app">
+    <header class="appbar">
+      <button type="button" class="icon-btn" id="back-btn" aria-label="홈으로"></button>
+      <div class="appbar-title"><small>자취력 키우기</small><strong id="field-name"></strong></div>
+      <span class="progress" id="progress">1 / 5</span>
+    </header>
+    <div class="segments" id="segments"></div>
+    <main class="app-main">
+      <div class="char-wrap">
+        <img id="character-img" class="character-img fade-up" src="assets/characters/laundry_pose 01.png" alt="루온" />
+        <div class="bubble" id="bubble">참 잘했어요!</div>
+      </div>
+      <section class="quiz-card" id="quiz-card">
+        <span class="scene-tag" id="scene-tag">상황</span>
+        <h1 class="scene-title" id="scene-title"></h1>
+        <p class="scene-text" id="scene-text"></p>
+        <div class="choices" id="choices"></div>
+        <div class="explain" id="explain">
+          <span class="explain-head" id="explain-head">정답 해설</span>
+          <span class="explain-text" id="explain-text"></span>
+          <span class="source" id="source"></span>
+        </div>
+        <button type="button" class="btn btn-lime next-btn" id="next-btn">다음 문제 <span class="chev">›</span></button>
+      </section>
+    </main>
+    <div class="combo" id="combo"><img src="assets/stickers/sticker-streak.png" alt="" /><strong>2연속 정답!</strong></div>
+    <div class="sticker-pop" id="sticker-pop"><div class="sticker-card"></div></div>
+  </div>
+
+
+<script src="js/app.js"></script>
+<script>
+/* =========================================================
+   이 페이지의 분야 설정 — 다른 분야는 이 부분만 바꾸면 됨
+   ========================================================= */
+const CATEGORY = { id:'laundry', emoji:'🧺', poseImg:'assets/characters/laundry_pose 01.png', correctImg:'assets/characters/laundry_pose 02.png', wrongImg:'assets/characters/laundry_pose 03.png' };
+
+/* 문제 데이터 (기존 그대로) */
+const QUESTIONS = [
+  {
+    sceneTitle:"빨래 바구니가 가득 찬 주말",
+    sceneText:"흰 티셔츠와 새로 산 빨간 후드티가 한가득 쌓였어요. 한 번에 다 돌리고 싶은 마음이 굴뚝같아요.",
+    choices:["색 상관없이 한 번에 다 돌린다","흰옷과 색 있는 옷을 나눠서 돌린다","찬물이면 색 안 빠지니 그냥 섞는다"],
+    answerIndex:1,
+    explanation:"색이 진한 옷과 밝은 옷은 나눠 세탁하는 게 좋다고 해! 새 옷은 특히 물이 빠질 수 있어요.",
+    source:"2026.05 한국소비자원 기준"
+  },
+  {
+    sceneTitle:"처음 세탁기를 돌리는 밤",
+    sceneText:"세제 통에 계량선이 보이는데, 빨래가 깨끗해지라고 듬뿍 넣고 싶어요.",
+    choices:["많이 넣을수록 깨끗하니 가득 넣는다","표시된 적정량만큼만 넣는다","눈대중으로 두 배쯤 넣는다"],
+    answerIndex:1,
+    explanation:"세제는 정해진 적정량만 넣는 게 좋다고 해! 너무 많으면 잔여물이 남아 옷과 세탁기에 안 좋아요.",
+    source:"2026.05 한국소비자원 기준"
+  },
+  {
+    sceneTitle:"니트와 셔츠를 같이 빨아야 할 때",
+    sceneText:"아끼는 울 니트와 평범한 면 셔츠를 함께 세탁기에 넣으려 해요.",
+    choices:["둘 다 표준 코스로 돌린다","울/섬세 코스 등 옷에 맞는 코스를 고른다","뜨거운 물 코스로 확실히 빤다"],
+    answerIndex:1,
+    explanation:"옷 종류에 맞는 세탁 코스를 고르는 게 좋다고 해! 울·섬세 의류는 전용 코스로 손상을 줄여요.",
+    source:"2026.05 의류 취급 표시 기준"
+  },
+  {
+    sceneTitle:"세탁이 끝났다는 알림이 울린 아침",
+    sceneText:"바쁜 출근길, 빨래는 다 됐는데 세탁기 안에 그대로 두고 나갈까 고민돼요.",
+    choices:["저녁에 와서 꺼내도 괜찮다","끝나면 바로 꺼내서 넌다","하루 정도는 둬도 상관없다"],
+    answerIndex:1,
+    explanation:"세탁이 끝나면 바로 꺼내 너는 게 좋다고 해! 젖은 채로 오래 두면 냄새와 곰팡이가 생겨요.",
+    source:"2026.05 한국소비자원 기준"
+  },
+  {
+    sceneTitle:"세탁기에서 쉰내가 올라오는 날",
+    sceneText:"분명 깨끗이 빨았는데 옷에서 꿉꿉한 냄새가 나요. 세탁기 안쪽도 찝찝해요.",
+    choices:["섬유유연제를 더 많이 넣는다","주기적으로 통세척(세탁조 청소)을 한다","문을 꽉 닫아 둔다"],
+    answerIndex:1,
+    explanation:"세탁기는 주기적으로 통세척을 해주는 게 좋다고 해! 사용 후 문을 살짝 열어 말리면 냄새 예방에 도움돼요.",
+    source:"2026.05 가전 관리 권장 기준"
+  },
+  {
+    sceneTitle:"건조기에 넣기 직전",
+    sceneText:"빨리 말리고 싶어 모든 빨래를 건조기에 한꺼번에 넣으려 해요.",
+    choices:["라벨 확인 없이 다 넣는다","의류 라벨의 건조 가능 표시를 확인한다","뜨거울수록 좋으니 고온으로 돌린다"],
+    answerIndex:1,
+    explanation:"건조기 사용 전에는 의류 라벨을 확인하는 게 좋다고 해! 건조기 금지 표시가 있으면 옷이 줄거나 상해요.",
+    source:"2026.05 의류 취급 표시 기준"
+  }
+];
+</script>
+<script src="js/quiz.js"></script>
+</body>
+</html>

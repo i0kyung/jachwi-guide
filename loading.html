@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FFFBF5" />
+<title>자취 가이드 · 로딩</title>
+<link rel="icon" type="image/png" href="assets/brand/app-icon-64.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="css/app.css" />
+<style>
+  .loading-wrap{text-align:center;padding:24px;width:100%;margin:auto 0;}
+  .stage{position:relative;height:230px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:22px;}
+  .stage .shadow{position:absolute;bottom:2px;width:110px;height:16px;border-radius:50%;background:rgba(122,143,59,.18);
+    animation:shadowPulse .42s ease-in-out infinite;}
+  @keyframes shadowPulse{0%,100%{transform:scaleX(1);opacity:.9;}50%{transform:scaleX(.75);opacity:.5;}}
+  .character-img{position:relative;width:170px;height:auto;filter:drop-shadow(0 12px 18px rgba(58,58,58,.12));}
+  .run-bounce{animation:runBounce .42s ease-in-out infinite;}
+  @keyframes runBounce{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-13px) scale(1.03);}}
+  .done-pop{animation:popIn .45s var(--ease-pop);}
+  .dust{position:absolute;bottom:8px;left:50%;width:10px;height:10px;border-radius:50%;background:#E8E2CF;opacity:0;
+    animation:dust .6s ease-out infinite;}
+  .dust:nth-child(2){animation-delay:.2s;}.dust:nth-child(3){animation-delay:.4s;}
+  @keyframes dust{0%{transform:translate(-60px,0) scale(.6);opacity:.8;}100%{transform:translate(-120px,-12px) scale(1.4);opacity:0;}}
+  .loading-title{font-size:1.4rem;font-weight:950;margin-bottom:16px;letter-spacing:-.02em;}
+  .loading-title .dots span{display:inline-block;animation:dot 1s ease-in-out infinite;}
+  .loading-title .dots span:nth-child(2){animation-delay:.15s;}.loading-title .dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes dot{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+  .progress-track{max-width:320px;margin:0 auto;}
+  .progress-fill{transition:width .1s linear;}
+  .tip{margin:22px auto 0;max-width:320px;display:flex;align-items:center;gap:10px;text-align:left;
+    background:var(--white);border:1px solid rgba(221,229,194,.8);border-radius:16px;padding:10px 14px;
+    box-shadow:var(--soft-shadow);font-size:.84rem;font-weight:800;color:#5f664f;line-height:1.4;
+    animation:rise .5s var(--ease-out) .15s both;}
+  .tip b{flex:none;font-size:.7rem;font-weight:950;color:#fff;background:var(--leaf);padding:3px 8px;border-radius:999px;}
+</style>
+</head>
+<body>
+  <div class="app no-tabbar" id="app">
+    <main class="loading-wrap">
+      <div class="stage">
+        <span class="dust"></span><span class="dust"></span><span class="dust"></span>
+        <span class="shadow"></span>
+        <img id="character-img" class="character-img run-bounce" src="assets/characters/run_01.png" alt="달리는 루온" />
+      </div>
+      <h1 class="loading-title" id="loading-title">자취력을 키우는 중<span class="dots"><span>.</span><span>.</span><span>.</span></span></h1>
+      <div class="progress-track"><div id="bar" class="progress-fill"></div></div>
+      <p class="tip"><b>TIP</b><span id="tip"></span></p>
+    </main>
+  </div>
+<script src="js/app.js"></script>
+<script>
+spawnLeaves(document.getElementById('app'),5);
+const TIPS=[
+  '세탁이 끝나면 바로 꺼내 널어야 냄새가 안 나요.',
+  '관리비 고지서는 매달 항목을 한 번씩 확인해 보세요.',
+  '페트병은 라벨을 떼고 납작하게 눌러 배출해요.',
+  '고장이 나면 사진부터 찍고 집주인에게 알려요.',
+  '하루 두 번, 10분씩 환기하면 곰팡이를 막을 수 있어요.',
+  '세제는 많이 넣는다고 더 깨끗해지지 않아요.'
+];
+document.getElementById('tip').textContent=TIPS[Math.floor(Math.random()*TIPS.length)];
+const IMG=document.getElementById('character-img');
+IMG.addEventListener('error',()=>IMG.src='assets/characters/idle.png');
+const frames=['assets/characters/run_01.png','assets/characters/run_02.png'];
+let frame=0;
+const frameTimer=setInterval(()=>{frame=(frame+1)%frames.length;IMG.src=frames[frame];},260);
+let nextPage='index.html';try{nextPage=sessionStorage.getItem('nextPage')||'index.html';}catch{}
+const duration=1200+Math.floor(Math.random()*600);
+const started=Date.now();
+const bar=document.getElementById('bar');
+const timer=setInterval(()=>{
+  const progress=Math.min(100,((Date.now()-started)/duration)*100);
+  bar.style.width=progress+'%';
+  if(progress>=100){
+    clearInterval(timer);clearInterval(frameTimer);
+    IMG.className='character-img done-pop';IMG.src='assets/characters/happy.png';
+    document.getElementById('loading-title').textContent='준비 완료!';
+    document.querySelectorAll('.dust').forEach(d=>d.remove());
+    setTimeout(()=>goDirect(nextPage),380);
+  }
+},40);
+</script>
+</body>
+</html>

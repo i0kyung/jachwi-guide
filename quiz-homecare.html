@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FFFBF5" />
+<title>집 관리 퀴즈 · 자취력 키우기</title>
+<link rel="icon" type="image/png" href="assets/brand/app-icon-64.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/quiz.css" />
+</head>
+<body>
+  <div class="app no-tabbar" id="app">
+    <header class="appbar">
+      <button type="button" class="icon-btn" id="back-btn" aria-label="홈으로"></button>
+      <div class="appbar-title"><small>자취력 키우기</small><strong id="field-name"></strong></div>
+      <span class="progress" id="progress">1 / 5</span>
+    </header>
+    <div class="segments" id="segments"></div>
+    <main class="app-main">
+      <div class="char-wrap">
+        <img id="character-img" class="character-img fade-up" src="assets/characters/homecare_pose 01.png" alt="루온" />
+        <div class="bubble" id="bubble">참 잘했어요!</div>
+      </div>
+      <section class="quiz-card" id="quiz-card">
+        <span class="scene-tag" id="scene-tag">상황</span>
+        <h1 class="scene-title" id="scene-title"></h1>
+        <p class="scene-text" id="scene-text"></p>
+        <div class="choices" id="choices"></div>
+        <div class="explain" id="explain">
+          <span class="explain-head" id="explain-head">정답 해설</span>
+          <span class="explain-text" id="explain-text"></span>
+          <span class="source" id="source"></span>
+        </div>
+        <button type="button" class="btn btn-lime next-btn" id="next-btn">다음 문제 <span class="chev">›</span></button>
+      </section>
+    </main>
+    <div class="combo" id="combo"><img src="assets/stickers/sticker-streak.png" alt="" /><strong>2연속 정답!</strong></div>
+    <div class="sticker-pop" id="sticker-pop"><div class="sticker-card"></div></div>
+  </div>
+
+
+<script src="js/app.js"></script>
+<script>
+/* =========================================================
+   이 페이지의 분야 설정 — 다른 분야는 이 부분만 바꾸면 됨
+   ========================================================= */
+const CATEGORY = { id:'homecare', emoji:'🏠', poseImg:'assets/characters/homecare_pose 01.png', correctImg:'assets/characters/homecare_pose 02.png', wrongImg:'assets/characters/homecare_pose 03.png' };
+
+/* 문제 데이터 (기존 그대로) */
+const QUESTIONS = [
+  {
+    sceneTitle:"집에 들어서자 가스 냄새가 나는 순간",
+    sceneText:"현관문을 여니 매캐한 가스 냄새가 나요. 일단 불부터 켜고 확인하고 싶어요.",
+    choices:["전등 스위치를 켜고 확인한다","불꽃·전기 사용을 피하고 창문을 열어 환기한 뒤 밸브를 잠근다","환풍기를 켠다"],
+    answerIndex:1,
+    explanation:"가스 냄새가 나면 스위치·불꽃을 피하고 창문을 열어 환기한 뒤 가스밸브를 잠그는 게 좋다고 해! 작은 불꽃도 위험할 수 있어요.",
+    source:"2026.05 가스안전공사 안내 기준"
+  },
+  {
+    sceneTitle:"멀티탭 하나에 코드를 몰아 꽂은 날",
+    sceneText:"전기장판, 전기포트, 히터를 멀티탭 하나에 전부 꽂았어요.",
+    choices:["멀티탭 하나에 고전력 기기를 몰아 쓴다","고전력 기기는 분산해 꽂고 정격용량을 지킨다","문어발이어도 편하면 된다"],
+    answerIndex:1,
+    explanation:"전기히터처럼 전력이 큰 기기는 한 멀티탭에 몰지 말고 분산해 쓰는 게 좋다고 해! 과부하는 화재 위험이 있어요.",
+    source:"2026.05 전기안전 안내 기준"
+  },
+  {
+    sceneTitle:"창가 벽지에 검은 점이 생긴 아침",
+    sceneText:"겨울철 창가 벽에 검은 곰팡이가 조금씩 보이기 시작했어요.",
+    choices:["그냥 가구로 가린다","곰팡이를 제거하고 환기·제습으로 습기를 관리한다","마를 때까지 둔다"],
+    answerIndex:1,
+    explanation:"곰팡이는 닦아 제거하고, 환기와 제습으로 습기를 관리하는 게 좋다고 해! 습기를 잡아야 다시 생기지 않아요.",
+    source:"2026.05 실내환경 관리 안내 기준"
+  },
+  {
+    sceneTitle:"요리하고 환기를 깜빡한 저녁",
+    sceneText:"집 안 공기가 답답하고 습한데, 추워서 창문을 닫고만 지냈어요.",
+    choices:["창문은 계속 닫아 둔다","하루 몇 번 짧게 환기하고 제습에 신경 쓴다","공기청정기만 믿는다"],
+    answerIndex:1,
+    explanation:"하루에 몇 번 짧게라도 환기하고 제습에 신경 쓰는 게 좋다고 해! 실내 습도와 공기질 관리에 도움이 돼요.",
+    source:"2026.05 실내공기질 관리 안내 기준"
+  },
+  {
+    sceneTitle:"싱크대 근처에서 작은 벌레를 본 밤",
+    sceneText:"음식물 냄새가 나는지 싱크대 주변에 작은 벌레가 보이기 시작했어요.",
+    choices:["보일 때마다 잡기만 한다","음식물·물기를 치우고 배수구를 주기적으로 청소한다","그냥 둔다"],
+    answerIndex:1,
+    explanation:"벌레 예방은 음식물·물기를 바로 치우고 배수구를 주기적으로 청소하는 게 좋다고 해! 먹이와 습기를 없애는 게 핵심이에요.",
+    source:"2026.05 생활위생 관리 안내 기준"
+  },
+  {
+    sceneTitle:"하수구에서 냄새가 올라오는 주말",
+    sceneText:"싱크대·욕실 배수구에서 물이 잘 안 빠지고 냄새가 올라와요.",
+    choices:["방향제만 뿌린다","배수구 거름망 이물질을 비우고 주기적으로 청소한다","그대로 사용한다"],
+    answerIndex:1,
+    explanation:"배수구는 거름망의 이물질을 비우고 주기적으로 청소하는 게 좋다고 해! 막힘과 냄새를 예방할 수 있어요.",
+    source:"2026.05 생활위생 관리 안내 기준"
+  }
+];
+</script>
+<script src="js/quiz.js"></script>
+</body>
+</html>
